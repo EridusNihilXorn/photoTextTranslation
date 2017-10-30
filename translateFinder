@@ -1,0 +1,108 @@
+from google.cloud import translate
+import json
+storage_client = translate.Client()
+translate_client = translate.Client.from_service_account_json(
+    'E:/PyCharm/Google/textTranslation-1452d9207ed9.JSON')
+
+#Fill values of dictionary with translations of keys in target language.
+def fullfil_map(textMap, lang):
+    for word in textMap:
+        translation = translate.Client.translate(
+            storage_client,
+            word,
+            target_language=lang)
+        textMap[word] = (translation['translatedText'])
+
+#Uploading data from JSON or TXT file and creating empty dictionary with only keys.
+def load(loadType, lang):
+    #Uploading from JSON.
+    if loadType == 'FILE':
+        fileName = input("Enter file name (Auto 'translations').\n")
+        if fileName == "":
+            with open('translations.json') as mapFile:
+                textMap = json.load(mapFile)
+        else:
+            with open(fileName + ".json") as mapFile:
+                textMap = json.load(mapFile)
+    #Uploading from TXT.
+    elif loadType == 'NEW':
+        textMap = dict()
+        fullText = str()
+        fileName = input("Enter file name (Auto 'Words').\n")
+        if fileName == "":
+            with open('Words.txt') as words:
+                for word in words:
+                    if word != " ":
+                        fullText += word.rstrip() + " "
+                        textMap[word.rstrip()] = str()
+        else:
+            with open(fileName + ".txt") as words:
+                for word in words:
+                    if word != " ":
+                        fullText += word.rstrip() + " "
+                        textMap[word.rstrip()] = str()
+            #Fast option to display whole translation.
+            displayText = input("Enter 1 to show full text translate (Auto 0).\n")
+            if displayText:
+                print(fullText + "\n")
+                print(translate.Client.translate(storage_client, fullText, target_language=lang)['translatedText'] + "\n")
+
+        fullfil_map(textMap, lang)
+
+    else:
+        raise ValueError("Wrong input in section of loading data.\n")
+    return textMap
+
+def operation(operationType, textMap, lang):
+    #Shows translation for all words independently from environment(sentences).
+    if operationType == "ALL":
+        for word in textMap:
+            print(str(word) + " " + str(textMap[word]))
+    #Shows translation for entered word.
+    elif operationType == "ONE":
+        key = ""
+        while key != "EXIT":
+            key = input("Enter word to find in dictionary.('EXIT' to break.)\n")
+            if key in textMap:
+                print(str(textMap.get(key)) + "\n")
+            else:
+                print("Word is not in dictionary!\n")
+    else:
+        raise ValueError("Wrong input in section of operation choice.\n")
+
+#Saving dictionary to JSON file.
+def save(saveName):
+    if saveName != "NO":
+        with open(saveName + ".json", 'w') as mapFile:
+            json.dump(textMap, mapFile)
+            print("Saved to file named " + saveName + ".json\n")
+
+if __name__ == '__main__':
+    lang = input("Enter target language for translation.\n")
+    if len(lang) != 2:
+        raise ValueError("Wrong input in choice of target language.\n")
+
+    loadType = input("Enter 'FILE' to upload text from JSON,\n"
+                     "Enter 'NEW' to upload new text from file.\n")
+
+    textMap = load(loadType, lang)
+    operationType = ""
+    while 1:
+        operationType = input("Enter 'ONE' to translate one word,\n"
+                            "Enter 'ALL' to translate all words.\n"
+                            "Enter 'EXIT' to shut down program.\n")
+        if operationType == "EXIT":
+            break
+        operation(operationType, textMap, lang)
+
+    saveName = input("Want to save dictionary to JSON file?\nDesired fileName/'NO'\n")
+    save(saveName)
+
+
+
+
+
+
+
+
+
