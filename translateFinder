@@ -1,8 +1,7 @@
 from google.cloud import translate
 import json
 storage_client = translate.Client()
-translate_client = translate.Client.from_service_account_json(
-    'E:/PyCharm/Google/textTranslation-1452d9207ed9.JSON')
+### Authorization for usage of Google API, deleted here.
 
 #Fill values of dictionary with translations of keys in target language.
 def fullfil_map(textMap, lang):
